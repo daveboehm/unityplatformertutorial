@@ -10,6 +10,8 @@ public class Robot : MonoBehaviour {
 
     private bool attack;
 
+    private bool slide;
+
     [SerializeField]
     private float movementSpeed;
 
@@ -32,14 +34,21 @@ public class Robot : MonoBehaviour {
         float horizontal = Input.GetAxis("Horizontal");
         HandleMovement(horizontal);
         HandleAttacks();
-        Flip(horizontal);
+        if (!this.myAnimator.GetCurrentAnimatorStateInfo(0).IsName("Slide")) {
+            Flip(horizontal);
+        }
         ResetValues();
 	}
 
     private void HandleMovement(float horizontal) {
 
-        if (!this.myAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Attack")) {
+        if (!myAnimator.GetBool("slide") && !this.myAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Attack")) {
             myRigidbody.velocity = new Vector2(horizontal * movementSpeed, myRigidbody.velocity.y);
+        }
+        if (slide && !this.myAnimator.GetCurrentAnimatorStateInfo(0).IsName("Slide")) {
+            myAnimator.SetBool("slide", true);
+        } else if (!this.myAnimator.GetCurrentAnimatorStateInfo(0).IsName("Slide")) {
+            myAnimator.SetBool("slide", false);
         }
 
         myAnimator.SetFloat("speed", Mathf.Abs(horizontal));
@@ -53,8 +62,11 @@ public class Robot : MonoBehaviour {
     }
 
     private void HandleInputs() {
-        if (Input.GetKeyDown(KeyCode.RightShift)) {
+        if (Input.GetKeyDown(KeyCode.Period)) {
             attack = true;
+        }
+        if (Input.GetKeyDown(KeyCode.Comma)) {
+            slide = true;
         }
     }
 
@@ -69,5 +81,6 @@ public class Robot : MonoBehaviour {
 
     private void ResetValues() {
         attack = false;
+        slide = false;
     }
 }
