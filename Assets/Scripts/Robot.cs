@@ -8,6 +8,8 @@ public class Robot : MonoBehaviour {
 
     private Animator myAnimator;
 
+    private bool attack;
+
     [SerializeField]
     private float movementSpeed;
 
@@ -20,18 +22,40 @@ public class Robot : MonoBehaviour {
         myAnimator = GetComponent<Animator>();
         movementSpeed = 12;
 	}
-	
-	// Update is called once per frame
-	void FixedUpdate () {
+
+    private void Update() {
+        HandleInputs();
+    }
+
+    void FixedUpdate () {
 
         float horizontal = Input.GetAxis("Horizontal");
-        HandleMovement(horizontal); 
+        HandleMovement(horizontal);
+        HandleAttacks();
         Flip(horizontal);
+        ResetValues();
 	}
 
     private void HandleMovement(float horizontal) {
-        myRigidbody.velocity = new Vector2(horizontal * movementSpeed, myRigidbody.velocity.y);
+
+        if (!this.myAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Attack")) {
+            myRigidbody.velocity = new Vector2(horizontal * movementSpeed, myRigidbody.velocity.y);
+        }
+
         myAnimator.SetFloat("speed", Mathf.Abs(horizontal));
+    }
+
+    private void HandleAttacks() {
+        if (attack && !this.myAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Attack")) {
+            myAnimator.SetTrigger("attack");
+            myRigidbody.velocity = Vector2.zero;
+        }
+    }
+
+    private void HandleInputs() {
+        if (Input.GetKeyDown(KeyCode.RightShift)) {
+            attack = true;
+        }
     }
 
     private void Flip(float horizontal) {
@@ -41,5 +65,9 @@ public class Robot : MonoBehaviour {
             theScale.x *= -1;
             transform.localScale = theScale;
         }
+    }
+
+    private void ResetValues() {
+        attack = false;
     }
 }
